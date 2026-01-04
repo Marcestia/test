@@ -1,13 +1,23 @@
-def compute_ratios(df):
-    ratios = {}
+import pandas as pd
 
-    # Proxy croissance
-    ratios["growth_ratio"] = df["equity"] / df["oil"]
 
-    # Proxy inflation
-    ratios["inflation_ratio"] = df["gold"] / df["equity"]
+def compute_ratios(df: pd.DataFrame) -> pd.DataFrame:
+    """Calcule les ratios macro sur une zone donnée.
 
-    # Protection monétaire
-    ratios["gold_bond_ratio"] = df["gold"] / df["bond"]
+    Le résultat est un DataFrame aligné sur les dates d'entrée.
+    """
 
-    return ratios
+    expected_cols = {"equity", "oil", "gold", "bond"}
+    missing = expected_cols - set(df.columns)
+    if missing:
+        raise KeyError(f"Colonnes manquantes pour calculer les ratios: {missing}")
+
+    ratios = pd.DataFrame(
+        {
+            "growth_ratio": df["equity"] / df["oil"],
+            "inflation_ratio": df["gold"] / df["equity"],
+            "gold_bond_ratio": df["gold"] / df["bond"],
+        }
+    )
+
+    return ratios.dropna()
